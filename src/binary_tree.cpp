@@ -96,16 +96,26 @@ bool deleteSearch(Node *root, int value) {
 
 /* Checks if any two binary trees share the same structure and values */
 bool areEqual(Node *rootA, Node *rootB) {
+    // two empty trees are equal
     if(!(rootA) || !(rootB)) {
         return 1;
     }
+    // if root values are the same
     if (rootA->value == rootB->value) {
+        // if both trees have both children
         if (rootA->r && rootB->r && rootA->l && rootB->l) {
+            // if both trees only have one unique child check only one
+            if(rootA->r == rootA->l && rootB->l == rootB->r) {
+                return areEqual(rootA->r, rootB->r);
+            }
             return areEqual(rootA->r, rootB->r) && areEqual(rootA->l, rootB->l);
+        // if only right subtree exists
         } else if (rootA->r && rootB->r && !(rootA->l) && !(rootB->l)) {
             return areEqual(rootA->r, rootB->r);
+        // if only left subtree exists
         } else if (!(rootA->r) && !(rootB->r) && rootA->l && rootB->l) {
             return areEqual(rootA->l, rootB->l);
+        // if neither tree has any children
         } else if (!(rootA->r) && !(rootB->r) && !(rootA->l) && !(rootB->l)) {
             return 1;
         }
@@ -116,15 +126,24 @@ bool areEqual(Node *rootA, Node *rootB) {
 /* Checks to see if any binary tree is balanced.
  * Every root to leaf path is within 1 of each other */
 bool isBalanced(Node *root) {
+    // empty tree is balanced
     if(!(root)) {
         return 1;
+    // single node is balanced
     } else if(!(root->l) && !(root->r)) {
         return 1;
+    // no left subtree; check if right has too much height 
     } else if(!(root->l) && root->r) {
         return !(root->r->r) && !(root->r->l);
+    // no right subtree; check if left has too much height 
     } else if(root->l && !(root->r)) {
         return !(root->l->r) && !(root->l->l);
+    // check if both subtrees are balanced
     } else {
+        // check if both children are the same node
+        if(root->l == root->r) {
+            return isBalanced(root->r);
+        }
         return isBalanced(root->l) && isBalanced(root->r);
     }
 }
@@ -141,6 +160,13 @@ TEST_CASE("areEqual tests", "[areEqual]" ) {
     REQUIRE(areEqual(newNode(1), newNode(1)) == 1);
     // single node not equal
     REQUIRE(areEqual(newNode(1), newNode(2)) == 0);
+    // full tree of height 3
+    REQUIRE(areEqual(newNode(4, newNode(2, newNode(1), newNode(3)), newNode(6, newNode(5), newNode(7))),
+                     newNode(4, newNode(2, newNode(1), newNode(3)), newNode(6, newNode(5), newNode(7)))) == 1);
+    // two big trees that have copy nodes
+    struct Node *tree1 = bigTree(100, 1);
+    struct Node *tree2 = bigTree(100, 1);
+    REQUIRE(areEqual(tree1, tree2));
 }
 
 /* isBalanced tests */
@@ -151,6 +177,8 @@ TEST_CASE("isBalanced tests", "[isBalanced]" ) {
     REQUIRE(isBalanced(newNode(1, newNode(2), newNode(3))) == 1);
     // three node path is not balanced
     REQUIRE(isBalanced(newNode(1, newNode(2, newNode(3), NULL), NULL)) == 0);
+    // check speed on big tree of copies
+    REQUIRE(isBalanced(bigTree(100, 1)) == 1);
 }
 
 /* search on value tests */
