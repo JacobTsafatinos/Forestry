@@ -19,6 +19,14 @@ struct Node *newNode(int value) {
     return node;
 }
 
+struct Node *newNode(int value, struct Node *r, struct Node *l) {
+    struct Node *node = newNode(value);
+    node->r = r;
+    node->l = l;
+
+    return node;
+}
+
 /* BASIC METHODS */
 
 /* Inserting node into a search tree */
@@ -53,7 +61,9 @@ void insert(Node *root, int value) {
 /* OTHER */
 
 bool areEqual(Node *rootA, Node *rootB) {
-    if(!(rootA) || !(rootB))
+    if(!(rootA) || !(rootB)) {
+        return 1;
+    }
     if (rootA->value == rootB->value) {
         if (rootA->r && rootB->r && rootA->l && rootB->l) {
             return areEqual(rootA->r, rootB->r) && areEqual(rootA->l, rootB->l);
@@ -86,26 +96,22 @@ bool isBalanced(Node *root) {
 
 /* TESTS */
 
-TEST_CASE( "Empty tree is balenced", "[isBalanced]" ) {
-    REQUIRE( isBalanced(NULL) == 1 );
-}
-TEST_CASE( "Full tree of height 1 is balanced", "[isBalanced]" ) {
-    Node *a, *b, *c;
-    a = newNode(1);
-    b = newNode(2);
-    c = newNode(3);
-    b->r = a;
-    b->l = c;
-    REQUIRE( isBalanced(b) == 1 );
-}
-TEST_CASE( "Three node path not balanced", "[isBalanced]" ) {
-    Node *a, *b, *c;
-    a = newNode(1);
-    b = newNode(2);
-    c = newNode(3);
-    a->r = b;
-    b->r = c;
-    REQUIRE( isBalanced(a) == 0 );
+/* areEqual tests */
+TEST_CASE( "areEqual tests", "[areEqual]" ) {
+    // empty trees are equal
+    REQUIRE(areEqual(NULL, NULL) == 1);
+    // single node equal
+    REQUIRE(areEqual(newNode(1), newNode(1)) == 1);
+    // single node not equal
+    REQUIRE(areEqual(newNode(1), newNode(2)) == 0);
 }
 
-
+/* isBalanced tests */
+TEST_CASE( "isBalanced tests", "[isBalanced]" ) {
+    // empty tree is balanced
+    REQUIRE(isBalanced(NULL) == 1);
+    // full tree of height 1 is balanced
+    REQUIRE(isBalanced(newNode(1, newNode(2), newNode(3))) == 1);
+    // three node path is not balanced
+    REQUIRE(isBalanced(newNode(1, newNode(2, newNode(3), NULL), NULL)) == 0);
+}
