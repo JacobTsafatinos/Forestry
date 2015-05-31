@@ -9,6 +9,8 @@ struct Node {
     Node *l;
 };
 
+/* Constructors */
+
 // constructs a new node and returns a pointer to it
 struct Node *newNode(int value) {
     struct Node* node = new(struct Node);
@@ -19,24 +21,33 @@ struct Node *newNode(int value) {
     return node;
 }
 
-struct Node *newNode(int value, struct Node *r, struct Node *l) {
+struct Node *newNode(int value, struct Node *l, struct Node *r) {
     struct Node *node = newNode(value);
-    node->r = r;
     node->l = l;
+    node->r = r;
 
     return node;
 }
 
+struct Node *bigTree(int height, int value) {
+    if (height == 0) {
+        return newNode(value);
+    } 
+    struct Node *node = bigTree(--height, value);
+    return newNode(value, node, node);
+}
+
+
 /* BASIC METHODS */
 
 /* Inserting node into a search tree */
-void insert(Node *root, Node *node) {
+void insertSearch(Node *root, Node *node) {
     if (!(root)) {
         root->value = node->value;
     }
-    else if(root->value >= node->value) {
+    else if(root->value < node->value) {
         if(root->r) {
-            insert(root->r, node);
+            insertSearch(root->r, node);
         }
         else {
             root->r = node;
@@ -44,7 +55,7 @@ void insert(Node *root, Node *node) {
     }
     else {
         if(root->l) {
-            insert(root->l, node);
+            insertSearch(root->l, node);
         }
         else {
             root->r = node;
@@ -53,13 +64,37 @@ void insert(Node *root, Node *node) {
 }
 
 /* Inserting value into a search tree */
-void insert(Node *root, int value) {
+void insertSearch(Node *root, int value) {
     Node *node = newNode(value);
-    insert(root, node);
+    insertSearch(root, node);
+}
+
+/* Search for a node in a search tree */
+struct Node *search(Node *root, int value) {
+    if (!(root)) {
+        return NULL;
+    }
+    else if(root->value == value) {
+        return root;
+    } else if(root->value < value) {
+        return search(root->r, value);
+    } else {
+        return search(root->l, value);
+    }
+}
+
+bool deleteSearch(Node *root, int value) {
+    struct Node *node;
+    if ((node = search(root, value))) {
+        delete node;
+        return 1;
+    }
+    return 0;
 }
 
 /* OTHER */
 
+/* Checks if any two binary trees share the same structure and values */
 bool areEqual(Node *rootA, Node *rootB) {
     if(!(rootA) || !(rootB)) {
         return 1;
@@ -78,11 +113,12 @@ bool areEqual(Node *rootA, Node *rootB) {
     return 0;
 }
 
+/* Checks to see if any binary tree is balanced.
+ * Every root to leaf path is within 1 of each other */
 bool isBalanced(Node *root) {
     if(!(root)) {
         return 1;
-    }
-    else if(!(root->l) && !(root->r)) {
+    } else if(!(root->l) && !(root->r)) {
         return 1;
     } else if(!(root->l) && root->r) {
         return !(root->r->r) && !(root->r->l);
@@ -94,10 +130,11 @@ bool isBalanced(Node *root) {
 }
 
 
+
 /* TESTS */
 
 /* areEqual tests */
-TEST_CASE( "areEqual tests", "[areEqual]" ) {
+TEST_CASE("areEqual tests", "[areEqual]" ) {
     // empty trees are equal
     REQUIRE(areEqual(NULL, NULL) == 1);
     // single node equal
@@ -107,7 +144,7 @@ TEST_CASE( "areEqual tests", "[areEqual]" ) {
 }
 
 /* isBalanced tests */
-TEST_CASE( "isBalanced tests", "[isBalanced]" ) {
+TEST_CASE("isBalanced tests", "[isBalanced]" ) {
     // empty tree is balanced
     REQUIRE(isBalanced(NULL) == 1);
     // full tree of height 1 is balanced
@@ -115,3 +152,21 @@ TEST_CASE( "isBalanced tests", "[isBalanced]" ) {
     // three node path is not balanced
     REQUIRE(isBalanced(newNode(1, newNode(2, newNode(3), NULL), NULL)) == 0);
 }
+
+/* search on value tests */
+TEST_CASE("search with integer input tests", "[search]") {
+    struct Node *small = newNode(1);
+    struct Node *medium = newNode(5);
+    // search on an empty tree
+    REQUIRE(search(NULL, 1) == NULL);
+    // search on single node tree
+    REQUIRE(search(small, 1) == small);
+    // unsuccessful search on a single node tree
+    REQUIRE(search(small, 2) == NULL);
+    // search on a path
+    REQUIRE(search(newNode(3, newNode(2, small, NULL), NULL), 1) == small);
+    // search on full tree of height 2
+    REQUIRE(search(newNode(4, newNode(2, newNode(1), newNode(3)), newNode(6, medium, newNode(7))), 5) == medium);
+}
+
+
