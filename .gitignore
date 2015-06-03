@@ -1,3 +1,4 @@
 src/binary_tree
+src/tests
 *.swp
 *.o
