@@ -1,5 +1,15 @@
 module BinaryTree
   class Node
+    # our three features:
+    attr_reader :value
+    attr_accessor :left, :right
+
+    def initialize(v)
+      @value = v
+      @left = Node.new
+      @right = Node.new
+    end
+
     def insert(v)
       case value <=> v
       when 1 then insert_left(v)
