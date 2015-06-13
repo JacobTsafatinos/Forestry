@@ -1,17 +1,15 @@
 module BinaryTree
   class Node
     # our three features:
-    attr_reader :value
+    attr_reader :root
     attr_accessor :left, :right
 
     def initialize(v)
-      @value = v
-      @left = Node.new
-      @right = Node.new
+      @root = v
     end
 
     def insert(v)
-      case value <=> v
+      case root <=> v
       when 1 then insert_left(v)
       when -1 then insert_right(v)
       when 0 then false # the value is already present
@@ -19,7 +17,7 @@ module BinaryTree
     end
 
     def inspect
-      "{#{value}::#{left.inspect}|#{right.inspect}}"
+      "{#{root}::#{left.inspect}|#{right.inspect}}"
     end
 
     private
