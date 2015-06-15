@@ -16,6 +16,15 @@ module BinaryTree
       end
     end
 
+    # Check if node exists within tree
+    def include?(v)
+      case root <=> v
+      when 1 then left.include?(v)
+      when -1 then right.include?(v)
+      when 0 then true
+      end
+    end
+
     def inspect
       "{#{root}::#{left.inspect}|#{right.inspect}}"
     end
